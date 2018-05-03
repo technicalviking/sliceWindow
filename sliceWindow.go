@@ -62,14 +62,6 @@ func (nw *SliceWindow) PushBack(val float64) {
 	for nw.list.Len() > nw.maxLength {
 		removed := nw.list.Remove(nw.list.Front())
 		nw.sum -= removed.(float64)
-
-		if removed == nw.min {
-			nw.min = 0
-		}
-
-		if removed == nw.max {
-			nw.max = 0
-		}
 	}
 
 	nw.setMinMax()
@@ -78,19 +70,31 @@ func (nw *SliceWindow) PushBack(val float64) {
 func (nw *SliceWindow) setMinMax() {
 	i := 0
 
+	var (
+		min         float64
+		max         float64
+		minPosition int
+		maxPosition int
+	)
+
 	for e := nw.list.Front(); e != nil; e = e.Next() {
-		if (nw.min == 0) || nw.min >= e.Value.(float64) {
-			nw.minPosition = i
-			nw.min = e.Value.(float64)
+		if (min == 0) || min > e.Value.(float64) {
+			minPosition = i
+			min = e.Value.(float64)
 		}
 
-		if (nw.max == 0) || nw.max <= e.Value.(float64) {
-			nw.maxPosition = i
-			nw.max = e.Value.(float64)
+		if (max == 0) || max < e.Value.(float64) {
+			maxPosition = i
+			max = e.Value.(float64)
 		}
 
 		i++
 	}
+
+	nw.min = min
+	nw.max = max
+	nw.minPosition = minPosition
+	nw.maxPosition = maxPosition
 }
 
 //GetSliceFromList convert the list type into an equivalent []float64
